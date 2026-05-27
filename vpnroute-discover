@@ -23,26 +23,22 @@ OLD=""
 JSON="$($POWERSHELL \
   "Get-NetAdapter | Where-Object { \$_.InterfaceDescription -like 'TAP-Windows*' } | Select-Object Name, InterfaceGuid | ConvertTo-Json")"
 
-# No TAP-Windows adapters at all: explicit, visible failure.
+# No TAP-Windows adapters right now is NOT an error: write an empty config so the
+# service can start and idle; a later run picks them up once an adapter appears.
+# (A genuine PowerShell failure still aborts above via set -e.)
 if [ -z "$(printf '%s' "$JSON" | tr -d '[:space:]')" ]; then
-    echo "ERROR: no TAP-Windows adapters found on the Windows host." >&2
-    exit 1
+    : > "$CONF"
+    echo "No TAP-Windows adapters found — wrote empty $CONF; vpnroute will idle until a later discovery finds some."
+else
+    # Windows PowerShell's ConvertTo-Json emits a bare object for a single adapter
+    # and an array for multiple; normalise both to a stream of objects.
+    printf '%s' "$JSON" \
+    | jq -r '(if type == "array" then .[] else . end)
+             | "\(.InterfaceGuid | ltrimstr("{") | rtrimstr("}") | ascii_downcase)  \(.Name)"' \
+    > "$CONF"
+    echo "Written to $CONF:"
+    cat "$CONF"
 fi
-
-# Windows PowerShell's ConvertTo-Json emits a bare object for a single adapter
-# and an array for multiple; normalise both to a stream of objects.
-printf '%s' "$JSON" \
-| jq -r '(if type == "array" then .[] else . end)
-         | "\(.InterfaceGuid | ltrimstr("{") | rtrimstr("}") | ascii_downcase)  \(.Name)"' \
-> "$CONF"
-
-if [ ! -s "$CONF" ]; then
-    echo "ERROR: adapter discovery produced no entries." >&2
-    exit 1
-fi
-
-echo "Written to $CONF:"
-cat "$CONF"
 
 NEW=$(cat "$CONF")
 if [ "$OLD" != "$NEW" ] && systemctl is-active --quiet wsl-vpnroute; then

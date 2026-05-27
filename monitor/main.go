@@ -43,6 +43,9 @@ const (
 )
 
 func loadVPNGuids() (map[string]string, error) {
+	// vpnroute-discover writes this file before the service starts, so it must
+	// exist (a missing file is a real misconfiguration), but it may be empty —
+	// an empty file means "no adapters yet", which is handled by the caller.
 	f, err := os.Open(confFile)
 	if err != nil {
 		return nil, err
@@ -311,7 +314,10 @@ func main() {
 		log.Fatalf("failed to load VPN adapter config: %v", err)
 	}
 	if len(guids) == 0 {
-		log.Fatalf("no VPN adapters in %s — run vpnroute-discover first", confFile)
+		// No adapters configured yet: the tunnel still comes up and we idle. A
+		// later vpnroute-discover that finds adapters rewrites the config and
+		// restarts us, activating route syncing.
+		log.Printf("no VPN adapters configured in %s yet — tunnel up, idling until a discovery finds some", confFile)
 	}
 
 	if err := setupTAP(); err != nil {

@@ -88,8 +88,13 @@ install -m 755 vpnroute-discover "$SBINDIR/vpnroute-discover"
 install -m 644 wsl-vpnroute.service /etc/systemd/system/wsl-vpnroute.service
 systemctl daemon-reload
 systemctl enable wsl-vpnroute
+
+# Discover adapters before starting so the monitor always has a config (the file
+# must exist; it may be empty, in which case the service starts and idles). The
+# service isn't active yet, so discover won't restart it — we start it below.
+"$SBINDIR/vpnroute-discover"
 systemctl restart wsl-vpnroute
 
 echo ""
-echo "Done. If this is a first install, run: vpnroute-discover"
-echo "This detects your TAP-Windows VPN adapters and writes /etc/vpnroute/vpn-adapters.conf"
+echo "Done. wsl-vpnroute is installed, discovered, and started."
+echo "Re-run vpnroute-discover whenever you add, remove, or recreate a Windows VPN adapter."
