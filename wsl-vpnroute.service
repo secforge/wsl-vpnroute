@@ -1,0 +1,13 @@
+[Unit]
+Description=wsl-vpnroute (TAP tunnel + VPN route monitor)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/vpnroute-monitor
+Restart=on-failure
+RestartSec=5
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

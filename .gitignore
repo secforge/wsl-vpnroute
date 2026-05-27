@@ -1,0 +1,6 @@
+# Upstream binaries are downloaded at install time, never committed (see NOTICE)
+wsl-gvproxy.exe
+wsl-vm
+
+# Build artifact
+monitor/vpnroute-monitor

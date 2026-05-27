@@ -1,0 +1,31 @@
+wsl-vpnroute
+Copyright 2026 Steffen Heil / Secforge
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+------------------------------------------------------------------------------
+Third-party components (downloaded at install time, NOT distributed with this
+project)
+------------------------------------------------------------------------------
+
+At install time, install.sh downloads two prebuilt binaries from the
+gvisor-tap-vsock project and installs them as `wsl-gvproxy.exe` and `wsl-vm`:
+
+  gvisor-tap-vsock
+    https://github.com/containers/gvisor-tap-vsock
+    Copyright The gvisor-tap-vsock Authors
+    Licensed under the Apache License, Version 2.0.
+
+    - release asset `gvproxy-windows.exe`  -> installed as wsl-gvproxy.exe
+    - release asset `gvforwarder`          -> installed as wsl-vm
+
+The `wsl-gvproxy.exe` / `wsl-vm` naming convention follows the wsl-vpnkit
+project, which popularized running gvisor-tap-vsock under WSL2:
+
+  wsl-vpnkit
+    https://github.com/sakai135/wsl-vpnkit
+    Copyright (c) sakai135
+    Licensed under the MIT License.
+
+These upstream binaries are obtained directly from their official releases and
+are not redistributed as part of this repository.
